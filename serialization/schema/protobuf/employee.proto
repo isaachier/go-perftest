@@ -1,0 +1,12 @@
+syntax = "proto3";
+package protobuf;
+
+message Employee {
+    string first_name = 1;
+    string last_name = 2;
+    string position = 3;
+    double salary = 4;
+    int64 id = 5;
+    int64 manager_id = 6;
+    int64 update_time = 7;
+}

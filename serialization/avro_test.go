@@ -11,7 +11,7 @@ import (
 var schema string
 
 func init() {
-	schemaBytes, err := ioutil.ReadFile("schema/employee.avsc")
+	schemaBytes, err := ioutil.ReadFile("schema/avro/employee.avsc")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -50,6 +50,7 @@ func (e *employee) FromMap(m map[string]interface{}) (err error) {
 	e.position = m["position"].(string)
 	e.salary = m["salary"].(float64)
 	e.id = m["id"].(int64)
+	e.updateTime = m["updateTime"].(int64)
 
 	if managerIDEntry, ok := m["managerID"]; managerIDEntry != nil && ok {
 		if managerID, ok := managerIDEntry.(map[string]interface{})["long"]; ok {

@@ -1,9 +1,12 @@
-.PHONY: all benchmark clean
+.PHONY: all benchmark clean messages
 
 all: benchmark
 
 benchmark:
-	go test -bench . -benchmem -memprofile mem.out ./serialization
+	go test -bench=. -benchmem -cpuprofile=cpu.out -memprofile=mem.out ./serialization
 
 clean:
 	rm -f mem.out
+
+messages:
+	protoc --go_out=. serialization/schema/protobuf/employee.proto
