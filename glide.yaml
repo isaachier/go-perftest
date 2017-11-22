@@ -1,0 +1,5 @@
+package: github.com/isaachier/perftest
+import:
+- package: github.com/linkedin/goavro
+  version: ^2.0.1
+- package: github.com/Pallinder/go-randomdata

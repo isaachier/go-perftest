@@ -1,0 +1,10 @@
+hash: a8c57c7839628dd5a38d1b58bf442e98c9a8ac64c3990f96790da28e74b4a838
+updated: 2017-11-22T07:16:21.023139212-05:00
+imports:
+- name: github.com/linkedin/goavro
+  version: 8801bd0371e9f21f858b8a41f0ffb41c66b8dec8
+- name: github.com/Pallinder/go-randomdata
+  version: acaf3d8cb4966dde9acb023a9cfde148993fd392
+testImports:
+- name: github.com/golang/snappy
+  version: d7b1e156f50d3c4664f683603af70e3e47fa0aa2

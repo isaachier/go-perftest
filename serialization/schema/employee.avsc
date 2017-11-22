@@ -1,0 +1,35 @@
+{
+  "type": "record",
+  "name": "employee",
+  "fields": [
+    {
+      "name": "firstName",
+      "type": "string"
+    },
+    {
+      "name": "lastName",
+      "type": "string"
+    },
+    {
+      "name": "position",
+      "type": "string"
+    },
+    {
+      "name": "salary",
+      "type": "double"
+    },
+    {
+      "name": "id",
+      "type": "long"
+    },
+    {
+      "name": "managerID",
+      "type": ["null", "long"]
+    },
+    {
+      "name": "updateTime",
+      "type": "long",
+      "doc": "Unix timestamp"
+    }
+  ]
+}
