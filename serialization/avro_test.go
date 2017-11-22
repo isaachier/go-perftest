@@ -1,10 +1,8 @@
 package serialization
 
 import (
-	"bytes"
-	"encoding/binary"
 	"io/ioutil"
-	"os"
+	"runtime"
 	"testing"
 
 	"github.com/linkedin/goavro"
@@ -37,42 +35,75 @@ func (e *employee) Map() map[string]interface{} {
 	return m
 }
 
+func (e *employee) FromMap(m map[string]interface{}) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			if _, ok := r.(runtime.Error); ok {
+				panic(r)
+			}
+			err = r.(error)
+		}
+	}()
+
+	e.firstName = m["firstName"].(string)
+	e.lastName = m["lastName"].(string)
+	e.position = m["position"].(string)
+	e.salary = m["salary"].(float64)
+	e.id = m["id"].(int64)
+
+	if managerIDEntry, ok := m["managerID"]; managerIDEntry != nil && ok {
+		if managerID, ok := managerIDEntry.(map[string]interface{})["long"]; ok {
+			managerIDLong := managerID.(int64)
+			e.managerID = &managerIDLong
+		}
+	}
+
+	return nil
+}
+
+type avroCodec struct {
+	codec *goavro.Codec
+}
+
+func (c *avroCodec) encode(e *employee) ([]byte, error) {
+	return c.codec.BinaryFromNative(nil, e.Map())
+}
+
+func (c *avroCodec) decode(b []byte) (*employee, error) {
+	var result interface{}
+	var err error
+	var native map[string]interface{}
+	if result, _, err = c.codec.NativeFromBinary(b); err != nil {
+		return nil, err
+	}
+	native = result.(map[string]interface{})
+
+	e := employee{}
+	err = e.FromMap(native)
+	if err != nil {
+		return nil, err
+	}
+	return &e, nil
+}
+
+func (c *avroCodec) name() string {
+	return "avro"
+}
+
 func BenchmarkAvroEncoding(b *testing.B) {
 	codec, err := goavro.NewCodec(schema)
 	if err != nil {
 		b.Fatalf("Failed to create codec from schema: %v", err)
 	}
+	c := &avroCodec{codec: codec}
+	runEncodingBenchmark(c, b)
+}
 
-	binaryFile, err := ioutil.TempFile("testdata", "avro")
+func BenchmarkAvroDecoding(b *testing.B) {
+	codec, err := goavro.NewCodec(schema)
 	if err != nil {
-		b.Fatalf("Failed to create temporary file: %v", err)
+		b.Fatalf("Failed to create codec from schema: %v", err)
 	}
-	defer os.Remove(binaryFile.Name())
-
-	var buffer bytes.Buffer
-	for _, employee := range dataset {
-		binaryData, err := codec.BinaryFromNative(nil, employee.Map())
-		if err != nil {
-			b.Fatalf("Failed to encode employee record: %v", err)
-		}
-
-		sizeBytes := make([]byte, 8)
-		binary.BigEndian.PutUint64(sizeBytes[0:], uint64(len(binaryData)))
-		_, err = buffer.Write(sizeBytes)
-		if err != nil {
-			b.Fatalf("Failed to write binary data to buffer: %v", err)
-		}
-
-		_, err = buffer.Write(binaryData)
-		if err != nil {
-			b.Fatalf("Failed to write binary data to buffer: %v", err)
-		}
-
-		_, err = buffer.WriteTo(binaryFile)
-		if err != nil {
-			b.Fatalf("Failed to write employee to file: %v", err)
-		}
-
-		buffer.Reset()
-	}
+	c := &avroCodec{codec: codec}
+	runDecodingBenchmark(c, b)
 }
