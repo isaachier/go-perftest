@@ -10,3 +10,4 @@ clean:
 
 messages:
 	protoc --go_out=. serialization/schema/protobuf/employee.proto
+	protoc --gofast_out=. serialization/schema/gogoprotobuf/employee.proto
