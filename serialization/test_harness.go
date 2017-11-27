@@ -66,6 +66,7 @@ func runEncodingBenchmark(c codec, b *testing.B) {
 
 		sizeBytes := make([]byte, 8)
 		binary.BigEndian.PutUint64(sizeBytes[0:], uint64(len(binaryData)))
+		b.SetBytes(int64(len(binaryData)))
 		_, err = buffer.Write(sizeBytes)
 		if err != nil {
 			b.Fatalf("Failed to write binary data to buffer: %v", err)
@@ -86,12 +87,14 @@ func runEncodingBenchmark(c codec, b *testing.B) {
 }
 
 func runDecodingBenchmark(c codec, b *testing.B) {
+	b.Helper()
 	for i := 1; i <= 3; i++ {
 		runDecodingBenchmarkHelper(c, b, i)
 	}
 }
 
 func runDecodingBenchmarkHelper(c codec, b *testing.B, index int) {
+	b.Helper()
 	file, err := os.Open(fmt.Sprintf("testdata/%s%d.data", c.name(), index))
 	if err != nil {
 		b.Fatalf("Failed to open data file: %v", err)
@@ -114,6 +117,7 @@ func runDecodingBenchmarkHelper(c codec, b *testing.B, index int) {
 			b.Fatalf("Failed to read required number of bytes"+
 				", expected %d, actual %d", numRecordBytes, numBytes)
 		}
+		b.SetBytes(int64(len(data)))
 		_, err := c.decode(data[0:])
 		if err != nil {
 			b.Fatalf("Failed to decode employee record: %v", err)

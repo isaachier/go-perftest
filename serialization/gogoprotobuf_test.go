@@ -3,8 +3,6 @@ package serialization
 import (
 	"testing"
 
-	"github.com/golang/protobuf/proto"
-
 	"github.com/isaachier/go-perftest/serialization/schema/gogoprotobuf"
 )
 
@@ -21,12 +19,12 @@ func (c *gogoProtobufCodec) encode(e *employee) ([]byte, error) {
 		employeePB.ManagerId = *e.managerID
 	}
 	employeePB.UpdateTime = e.updateTime
-	return proto.Marshal(&employeePB)
+	return employeePB.Marshal()
 }
 
 func (c *gogoProtobufCodec) decode(b []byte) (*employee, error) {
 	employeePB := gogoprotobuf.Employee{}
-	if err := proto.Unmarshal(b, &employeePB); err != nil {
+	if err := employeePB.Unmarshal(b); err != nil {
 		return nil, err
 	}
 	e := employee{}
